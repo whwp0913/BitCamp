@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    
+  <mapper namespace="org.zerock.mapper.RecommendMapper">
+  
+  <insert id="addRecommend" parameterType="java.util.List">
+	  insert into t_irecom (title, rtitle, value) values 
+	  <foreach collection="list" index="index" item="item" open="(" separator="),(" close=")">
+	  #{item.title},#{item.rtitle}, #{item.value}
+	  </foreach>
+  </insert>
+  
+  <delete id="removeRecom">
+  	delete from t_irecom
+  </delete>
+  
+  <select id="listIRecom" resultType="java.util.HashMap" parameterType="int">
+	<!-- select title, link from t_review a inner join (
+	
+		select rtitle from t_irecom where no > 0 and title = #{code} ) 
+		
+		b on a.code = b.rtitle where vno > 0 group by title ,link -->
+		
+		select title, link from t_review  a inner join (
+        
+        select rtitle from t_irecom where no > 0 and title = #{code}
+        
+        ) b on a.code = b.rtitle group by title, link;
+  </select>
+  
+  </mapper>

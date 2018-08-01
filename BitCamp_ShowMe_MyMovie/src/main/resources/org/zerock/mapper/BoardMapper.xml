@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.zerock.mapper.BoardMapper">
+
+	<select id="bestList" resultType="org.zerock.domain.BoardVO">
+	select c.bno, c.title, c.mid, c.regdate, c.views, c.kname kno, t.gname gno  
+	from t_genre t right join 
+	(select b.bno,b.title, b.mid, b.regdate, b.views, k.kname, b.gno from t_board b 
+	left join t_kind k on b.kno = k.kno) c 
+	on t.gno = c.gno where c.bno > 0 and regdate between curdate() - interval 1 day and curdate() + interval 1 day order by views desc limit 0, 10
+	</select>
+
+	<select id="list" resultType="org.zerock.domain.BoardVO">
+		select * from t_board
+		order by bno
+		desc
+		limit #{pageStart},#{perPageNum}
+	</select>
+
+	<select id="read" resultType="org.zerock.domain.BoardVO">
+		select * from t_board where
+		bno=#{bno}
+	</select>
+
+	<insert id="insert">
+		insert into t_board(title, content, mid, gno, kno)
+		values(#{title}, #{content},#{mid}, #{gno}, #{kno})
+	</insert>
+
+	<update id="update">
+		update t_board set title = #{title},
+		content=#{content}, updatedate = now()
+		where bno=#{bno}
+	</update>
+	
+	<delete id="delete">
+		delete from t_board where bno=#{bno}
+	</delete>
+
+	<select id="count" resultType="int">
+		select count(*) from t_board
+		<include refid="criteria"></include>
+	</select>
+
+	<sql id="criteria">
+		<if test="type !='' and keyword !=''">
+			<where>
+				<foreach collection="arr" separator="OR" item="type"
+					open="(" close=")">
+
+					<if test="type eq 't'.toString()">
+						title like concat ('%',#{keyword},'%' )
+					</if>
+
+					<if test="type eq 'c'.toString()">
+						content like concat ('%',#{keyword},'%')
+					</if>
+
+					<if test="type eq 'm'.toString()">
+						mid like concat ('%',#{keyword},'%')
+					</if>
+				</foreach>
+			</where>
+		</if>
+	</sql>
+
+
+	<select id="searchList" resultType="org.zerock.domain.BoardVO">
+
+		select c.bno, c.title, c.mid, c.regdate, c.views, c.kname kno, t.gname gno  
+		from t_genre t right join 
+		(select b.bno,b.title,b.content, b.mid, b.regdate, b.views, k.kname, b.gno from t_board b 
+		left join t_kind k on b.kno = k.kno) c 
+		on t.gno = c.gno
+
+		<include refid="criteria"></include>
+
+		order by bno desc
+		limit #{pageStart},#{perPageNum}
+
+	</select>
+	
+
+	<!-- 파일 업로드 sql 시작 -->
+	<insert id="addFile" parameterType="org.zerock.domain.BoardVO" >
+		<selectKey order="BEFORE" keyProperty="bno" resultType="int">
+			<!-- select max(bno) bno from t_board -->
+			SELECT LAST_INSERT_ID();
+		</selectKey>
+			
+		insert into t_file (fullname, bno)
+		values
+		<foreach collection="files" item="item" separator="," > 
+		( #{item}, #{bno})
+		</foreach>
+	</insert>
+	
+	<!-- 파일 삭제 sql -->
+	<delete id="removeFile">
+	delete from t_file where bno = #{bno}
+	</delete>
+	
+	<!-- 파일 조회 sql -->
+	<select id="searchFile" resultType="string">
+	select fullname from t_file where bno = #{bno} 
+	</select>
+	
+	<update id="addViews">
+	update t_board set views = views + 1 where bno = #{bno}
+	</update>
+
+	<!-- 글 수정 시 파일 삭제 -->
+	<delete id="removeFiles" parameterType="string">
+	delete from t_file where fullname in
+	<foreach collection="array" item="item" separator="," open="(" close=")">
+	 #{item}
+	</foreach>
+	</delete>
+	
+	<!-- 글 수정 시 파일 등록 -->
+	<insert id="modiFile" parameterType="org.zerock.domain.BoardVO">
+	insert into t_file (fullname, bno) values
+	<foreach collection="files" item="item" separator=",">
+	( #{item}, #{bno})
+	</foreach>
+	</insert>
+	
+	
+</mapper>
+
+

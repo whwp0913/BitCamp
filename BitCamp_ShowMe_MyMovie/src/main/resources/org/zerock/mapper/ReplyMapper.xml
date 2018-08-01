@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    <mapper namespace="org.zerock.mapper.ReplyMapper">
+    
+    <!-- 댓글 등록-->
+    <insert id="insert">
+    insert into t_reply (content, mid, bno) values ( #{content}, #{mid}, #{bno})
+    </insert>
+    
+    <!-- 해당글에 대한 댓글 리스트 -->
+    <select id="list" resultType="org.zerock.domain.ReplyVO">
+    select * from t_reply where bno = #{bno} order by rno asc
+    </select>
+    
+    <select id="listPage" resultType="org.zerock.domain.ReplyVO">
+    
+    select * from t_reply where bno = #{bno} order by rno asc limit #{cri.pageStart},#{cri.perPageNum}
+    
+    </select>
+
+    <!-- 해당 댓글 수정 -->
+    <update id="update">
+    update t_reply set content= #{content} , updatedate= now() where rno= #{rno}
+    </update>
+    
+    <!-- 해당댓글 삭제 -->
+    <delete id="delete">
+    delete from t_reply where rno= #{rno}
+    </delete>
+    
+    <!-- 해당 글에대한 댓글의 총 넘버 -->
+    <select id="count" resultType="int">
+    select count(*) from t_reply where bno= #{bno}
+    </select>
+    
+    <!-- 댓글 하나 조회 -->
+    <select id="read" resultType="org.zerock.domain.ReplyVO">
+    select * from t_reply where rno = #{rno}
+    </select>
+    
+    <delete id="deleteAll">
+    delete from t_reply where bno = #{bno}
+    </delete>
+    
+  
+    
+    </mapper>
