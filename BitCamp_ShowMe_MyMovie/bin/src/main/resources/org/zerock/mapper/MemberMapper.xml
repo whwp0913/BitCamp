@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+   
+ <mapper namespace="org.zerock.mapper.MemberMapper">
+ 
+	 <select id="login" resultType="org.zerock.domain.MemberVO">
+	 select * from t_member where mid = #{mid} and mpw = #{mpw}
+	 </select>
+	 
+	 <insert id="signUp">
+	 insert into t_member(mid,mpw,mname,email,favor)
+	 values(#{mid},#{mpw},#{mname},#{email},#{favor})
+	 </insert>
+	  
+<!-- 	 <update id="keepLogin">
+	 update t_member set sessionkey = #{sessionId}, sessionlimit = #{next} where mid = #{mid}
+	 </update> -->
+	 
+
+
+	 
+	 <select id="idCheck" resultType="int">
+	 select count(*) from t_member where mid = #{id}
+	 </select>
+	 
+	 <!-- if문안에서는 favor나 genre같이 특정 값을 넣으면 getter를 찾을수 없다고 나온다
+	 	  그래서 test문안에 파라미터를 넣을 때 _parameter라고 넣어야 함 -->
+	 <select id="selectMovie" resultType="org.zerock.domain.RecommendVO" parameterType="org.zerock.domain.MemberVO">
+	 select * from t_movie
+	 <if test="_parameter != '없음'.toString()">
+	 where genre = #{favor}
+	 </if>
+	 order by rand() limit 0,3
+	 </select>
+	 
+	 <!-- 유저기반 추천시스템 -->
+	 <select id="uRecom" resultType="org.zerock.domain.ReviewVO" parameterType="org.zerock.domain.MemberVO">
+		select b.title, a.link from t_review  a inner join (
+        
+        select title from t_urecom where no > 0 and mid = #{mid}
+        
+        ) b on b.title = a.title where vno > 0 group by a.title, a.link limit 0, 5;
+	 </select>
+	 
+	 <!-- t_auth tables -->
+	 <insert id="insertAuth">
+	 insert into t_auth (mid) values (#{mid})
+	 </insert>
+	 
+	 <select id="getUserID" resultType="org.zerock.domain.MemberVO">
+	 select * from t_member where mid = #{mid}
+	 </select>
+	 
+	 <select id="getUserAuth" resultType="string">
+	 select auth from t_auth where mid = #{mid}
+	 </select>
+
+ </mapper>   

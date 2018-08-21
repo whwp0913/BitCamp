@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.zerock.mapper.PhotoMapper">
+
+	<select id="list" resultType="org.zerock.domain.PhotoVO">
+		select * from t_photo
+		order by
+		pno
+		desc
+		limit #{pageStart}, #{perPageNum}
+	</select>
+	
+	<select id="joinList" resultType="org.zerock.domain.PhotoVO">
+		select a.pno, a.mid, a.title, max(t.fullname) as image 
+		from (select * from t_photo) as a left join t_image as t on a.pno = t.pno  
+		group by a.title, a.pno order by a.pno desc
+		limit #{pageStart},#{perPageNum}
+	</select>
+
+	<select id="read" resultType="org.zerock.domain.PhotoVO">
+		select * from t_photo where
+		pno= #{pno}
+	</select>
+
+	<insert id="insert">
+		insert into t_photo(title, content, mid)
+		values(#{title}, #{content}, #{mid})
+	</insert>
+
+	<update id="update">
+		update t_photo set title = #{title},
+		content=#{content}, updatedate = now()
+		where pno = #{pno}
+	</update>
+
+	<delete id="delete">
+		delete from t_photo where pno = #{pno}
+	</delete>
+
+	<select id="count" resultType="int">
+		select count(*) from t_photo
+		<include refid="criteria"></include>
+	</select>
+
+	<sql id="criteria">
+		<if test="type !='' and keyword !=''">
+			<where>
+				<foreach collection="arr" separator="OR" item="type"
+					open="(" close=")">
+
+					<if test="type eq 't'.toString()">
+						title like concat ('%',#{keyword},'%' )
+					</if>
+
+					<if test="type eq 'c'.toString()">
+						content like concat ('%',#{keyword},'%')
+					</if>
+
+					<if test="type eq 'm'.toString()">
+						mid like concat ('%',#{keyword},'%')
+					</if>
+				</foreach>
+			</where>
+		</if>
+	</sql>
+
+
+	<select id="searchList" resultType="org.zerock.domain.PhotoVO">
+
+		select * from t_photo
+
+		<include refid="criteria"></include>
+
+		order by pno desc
+		limit #{pageStart},#{perPageNum}
+
+	</select>
+
+
+	<!-- 파일 업로드 sql 시작 -->
+	<insert id="addImage" parameterType="org.zerock.domain.PhotoVO">
+		<selectKey order="BEFORE" keyProperty="pno" resultType="int">
+			select max(pno) pno from t_photo
+		</selectKey>
+		insert into t_image (fullname, pno)
+		values
+		<foreach collection="images" item="item" separator=",">
+			( #{item}, #{pno})
+		</foreach>
+	</insert>
+
+	<!-- 파일 삭제 sql -->
+	<delete id="removeImage">
+		delete from t_image where pno = #{pno}
+	</delete>
+
+	<!-- 파일 조회 sql -->
+	<select id="searchImage" resultType="string">
+		select fullname from t_image where pno = #{pno}
+	</select>
+
+	<update id="addViews">
+		update t_photo set views = views + 1 where pno = #{pno}
+	</update>
+
+	<!-- 글 수정 시 파일 삭제 -->
+	<delete id="removeImages" parameterType="string">
+		delete from t_image where fullname in
+		<foreach collection="array" item="item" separator="," open="("
+			close=")">
+			#{item}
+		</foreach>
+	</delete>
+
+	<!-- 글 수정 시 파일 등록 -->
+	<insert id="modiImage" parameterType="org.zerock.domain.PhotoVO">
+		insert into t_image (fullname, pno) values
+		<foreach collection="images" item="item" separator=",">
+			( #{item}, #{pno})
+		</foreach>
+	</insert>
+
+</mapper>

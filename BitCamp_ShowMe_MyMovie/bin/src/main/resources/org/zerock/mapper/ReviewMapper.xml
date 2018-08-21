@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+		
+<mapper namespace="org.zerock.mapper.ReviewMapper">
+
+	<insert id="insertReview" parameterType="org.zerock.domain.ReviewVO">
+		<selectKey order="BEFORE" keyProperty="mno" resultType="int">
+			select mno from t_member where mid = #{mid}
+		</selectKey>
+		insert into t_review (mid, title, code, comment, rating, link, mno)
+		values (#{mid}, #{title}, #{code}, #{comment}, #{rating}, #{link}, #{mno})
+	</insert>
+	
+	
+	<!-- 검색 Criteria -->
+	<sql id="criteria">
+	<where>
+			vno > 0
+			<if test="type !='' and keyword !=''">			
+					<if test="type eq 'w'.toString()">
+						and mid like concat ('%',#{keyword},'%' )
+					</if>
+
+					<if test="type eq 't'.toString()">
+						and title like concat ('%',#{keyword},'%')
+					</if>			
+			</if>
+		</where>
+	</sql>
+	
+	<!-- 리뷰 리스트 -->
+	<select id="listReviews" resultType="org.zerock.domain.ReviewVO">
+	select * from t_review
+	
+	<include refid="criteria"></include>
+	
+	order by vno desc limit #{pageStart},#{perPageNum}
+	</select>  
+	
+	<!-- 리뷰 삭제 -->
+	<delete id="deleteReview">
+	delete from t_review where vno = #{vno}
+	</delete>
+	
+	<!-- 리뷰 총 갯수 -->
+	<select id="countReview" resultType="int">
+		select count(*) from t_review
+		<include refid="criteria"></include>
+	</select>
+	
+</mapper>
