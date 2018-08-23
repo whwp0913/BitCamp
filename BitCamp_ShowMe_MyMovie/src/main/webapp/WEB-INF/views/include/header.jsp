@@ -75,7 +75,7 @@ body{
  
   <!-- Modal -->
   <div class="modal fade" id="myModal" role="dialog">
-    <div class="modal-dialog">    
+    <div class="modal-dialog" style="width: 1500px">    
       <!-- Modal content-->
       <div class="modal-content">
       
@@ -83,7 +83,7 @@ body{
           <button type="button" class="close" data-dismiss="modal">&times;</button>
           <h4 class="modal-title text-center">
           <c:if test="${favor ne null}">
-				오늘의 추천영화 
+			선호하는 장르에 맞춘 영화 추천  
 		  </c:if></h4>
         </div>
         
@@ -91,28 +91,40 @@ body{
           <div class="row">
 			<div class="col-sm-12">		
  				<c:forEach items="${favor}" var="Recommend">
-				<div class="col-sm-4 text-center">
- 					<div class="recommend" style="text-align: center;"><img class="thumbnail"src="${Recommend.image}"></div>
- 					
-						<div>${Recommend.title}</div>
-						<div>${Recommend.genre}</div>
-						<div>감독 : ${Recommend.director}</div>
-						<div>제작 국가 : ${Recommend.country}</div>
-					
+				<div class="col-sm-2 text-center">
+ 					<div class="recommend" style="text-align: center;">
+ 						<img class="thumbnail center-block"src="${Recommend.image}">
+ 					</div> 					
+					<div>${Recommend.title}</div>
+					<div>${Recommend.genre}</div>
+					<div>감독 : ${Recommend.director}</div>
+					<div>제작 국가 : ${Recommend.country}</div>					
 				</div>		
 				</c:forEach>
-
 			</div>
+          </div>
+        </div>
+        
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title text-center">
+          <c:if test="${favor ne null}">
+				이런 영화는 어떠세요?
+		  </c:if></h4>
+        </div>
+        
+        <div class="modal-body">
+          <div class="row">
 			<div class="col-sm-12">
-			<c:forEach items="${list}" var="Urecom">
-				<div class="col-sm-4 text-center">
- 					<div class="recommend"><img class="thumbnail"src="${Urecom.link}"></div>
- 					
-						<div>${Urecom.title}</div>
-					
-				</div>		
-				</c:forEach>
-			</div>
+		      <c:forEach items="${list}" var="Urecom">
+		        <div class="col-sm-2 text-center">
+		          <div class="recommend">
+		          <img class="thumbnail center-block"src="${Urecom.link}">
+		          </div>          
+		          <div>${Urecom.title}</div>          
+		        </div>    
+		      </c:forEach>
+      		</div>
           </div>
         </div>
         
